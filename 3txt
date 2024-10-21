@@ -1,0 +1,62 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.metrics import classification_report, accuracy_score
+
+digits = datasets.load_digits()
+
+print("Dataset shape:", digits.images.shape)
+print("Number of samples:", len(digits.images))
+print("Number of features per sample:", digits.data.shape[1])
+
+plt.figure(figsize=(10,4))
+for index, (image, label) in enumerate(zip(digits.images[:5], digits.target[:5])):
+    plt.subplot(1, 5, index + 1)
+    plt.imshow(image, cmap=plt.cm.gray_r, interpolation='nearest')
+    plt.title(f'Label: {label}')
+plt.show()
+
+X = digits.data  # Features (flattened images)
+y = digits.target  # Labels (digit classes)
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+
+print("Training set size:", X_train.shape)
+print("Test set size:", X_test.shape)
+
+svm_model = SVC(kernel='linear', random_state=42)
+
+svm_model.fit(X_train, y_train)
+
+y_pred_train = svm_model.predict(X_train)
+y_pred_test = svm_model.predict(X_test)
+
+print("Training accuracy:", accuracy_score(y_train, y_pred_train))
+print("Test accuracy:", accuracy_score(y_test, y_pred_test))
+
+print("\nClassification report on test data:")
+print(classification_report(y_test, y_pred_test))
+
+plt.figure(figsize=(10,4))
+for index, (image, prediction) in enumerate(zip(X_test[:5], y_pred_test[:5])):
+    plt.subplot(1, 5, index+1)
+    plt.imshow(image.reshape(8,8), cmap=plt.cm.gray_r, interpolation= 'nearest')
+    plt.title(f'Pred: {prediction}')
+plt.show
+
+#Allowing user input for an index
+index = int(input("Enter an index from the dataset (0 to{}):".format(len(X_test)-1)))
+image = X_test[index].reshape(8,8)
+plt.imshow(image, cmap='gray')
+plt.title(f"True label:{y_test[index]}")
+plt.show
+
+#Predicted digit
+predicted_digit = svm_model.predict([X_test[index]])
+print("Predicted digit: ", predicted_digit[0])
