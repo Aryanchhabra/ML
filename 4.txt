@@ -1,0 +1,48 @@
+# Import necessary libraries
+import pandas as pd
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+# Load the Iris dataset
+
+iris_data = pd.read_csv('iris.csv')
+
+# Display the first few rows of the dataset
+iris_data.head()
+
+# Drop the "Id" and "Species" columns as they are not required for clustering
+X = iris_data.drop(columns=["Id", "Species"])
+
+# Determine the optimal number of clusters using the elbow method
+inertia = []
+cluster_range = range(1, 11)  # We will test cluster sizes from 1 to 10
+
+# Fit K-Means with different cluster sizes and store inertia (sum of squared distances)
+for k in cluster_range:
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    kmeans.fit(X)
+    inertia.append(kmeans.inertia_)
+
+# Plot the elbow curve to visualize the optimal number of clusters
+plt.figure(figsize=(8, 6))
+plt.plot(cluster_range, inertia, marker='o', linestyle='-', color='b')
+plt.title('Elbow Method for Optimal Number of Clusters')
+plt.xlabel('Number of clusters (k)')
+plt.ylabel('Inertia')
+plt.xticks(cluster_range)
+plt.grid(True)
+plt.show()
+
+# Fit K-Means with 3 clusters (based on the elbow method)
+kmeans_optimal = KMeans(n_clusters=3, random_state=42)
+iris_data['Cluster'] = kmeans_optimal.fit_predict(X)
+
+# Plotting Sepal Length vs Sepal Width colored by the cluster
+plt.figure(figsize=(8, 6))
+plt.scatter(iris_data['SepalLengthCm'], iris_data['SepalWidthCm'], c=iris_data['Cluster'], cmap='viridis', s=50)
+plt.title('K-Means Clustering (3 Clusters) - Sepal Length vs Sepal Width')
+plt.xlabel('Sepal Length (cm)')
+plt.ylabel('Sepal Width (cm)')
+plt.grid(True)
+plt.colorbar(label='Cluster')
+plt.show()
